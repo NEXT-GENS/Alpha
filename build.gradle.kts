@@ -4,25 +4,27 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    compileSdk = 33 // Menambahkan '='
     namespace = "id.extension.komikindo"
 
     defaultConfig {
         applicationId = "id.extension.komikindo"
-        minSdk 21
-        targetSdk 33
-        versionCode 1
-        versionName = "1.0"
+        minSdk = 21 // Menambahkan '='
+        targetSdk = 33 // Menambahkan '='
+        versionCode = 1 // Menambahkan '='
+        versionName = "1.0" // Menambahkan '='
     }
 
     buildTypes {
-        release {
+        getByName("release") {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     
-    // Memastikan source set berada di folder yang kita buat
     sourceSets {
         getByName("main") {
             java.setSrcDirs(listOf("src/main/java"))
