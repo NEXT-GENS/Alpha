@@ -3,7 +3,7 @@ name: Build and Release Extension
 on:
   push:
     tags:
-      - 'v*' # Jalan saat kamu buat tag v1.0, v1.1, dll
+      - 'v*'
 
 jobs:
   build:
@@ -22,14 +22,20 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
-      # CARA A: Langsung panggil 'gradle' sistem, bukan './gradlew'
+      # STEP BARU: Menginstal Android SDK agar Gradle tidak error "SDK not found"
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # Kita gunakan gradle-build-action untuk memastikan versi gradle kompatibel
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
       - name: Build with Gradle
         run: gradle assembleRelease
 
       - name: Prepare APK for Release
         run: |
           mkdir -p release-artifacts
-          # Mencari APK di folder build (path standar Android Gradle Plugin)
           find . -name "*.apk" -exec cp {} release-artifacts/extension-release.apk \;
 
       - name: Create GitHub Release
@@ -38,6 +44,6 @@ jobs:
           files: release-artifacts/extension-release.apk
           name: "Release ${{ github.ref_name }}"
           tag_name: ${{ github.ref }}
-          body: "Otomatis di-build menggunakan Cara A. Versi: ${{ github.ref_name }}"
+          body: "Build fixed with Android SDK setup. Versi: ${{ github.ref_name }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
