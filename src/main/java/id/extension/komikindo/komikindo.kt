@@ -5,7 +5,7 @@ import org.jsoup.nodes.Element
 
 class KomikIndo : Source() {
     override val name = "KomikIndo"
-    override val baseUrl = "https://komikindo.id"
+    override val baseUrl = "https://komikindo.ch"
     override val language = "id"
 
     override fun popularManga(page: Int): List<Manga> {
