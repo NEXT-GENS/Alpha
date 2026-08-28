@@ -2,15 +2,12 @@ package id.extension.komikindo
 
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
-import java.util.regex.Pattern
 
-// Kita membuat class sendiri yang meniru fungsi MangaThemesia agar bisa di-build mandiri
 class KomikIndo : Source() {
     override val name = "KomikIndo"
-    override val baseUrl = "https://komikindo.ch"
+    override val baseUrl = "https://komikindo.id"
     override val language = "id"
 
-    // Fungsi untuk mengambil manga populer
     override fun popularManga(page: Int): List<Manga> {
         val doc = http.get("$baseUrl/manga-pop/page/$page").body()
         return doc.select(".page-item").map { element ->
@@ -24,7 +21,6 @@ class KomikIndo : Source() {
         }
     }
 
-    // Fungsi untuk mengambil detail manga
     override fun mangaDetails(url: String): Manga {
         val doc = http.get(url).body()
         return Manga(
@@ -36,7 +32,6 @@ class KomikIndo : Source() {
         )
     }
 
-    // Fungsi untuk mengambil daftar chapter
     override fun chapterList(manga: Manga): List<Chapter> {
         val doc = http.get(manga.url).body()
         return doc.select(".wp-manga-chapter").mapIndexed { index, element ->
@@ -48,23 +43,28 @@ class KomikIndo : Source() {
         }.reversed()
     }
 
-    // Fungsi untuk mengambil gambar di dalam chapter
     override fun pageList(chapter: Chapter): List<String> {
         val doc = http.get(chapter.url).body()
         return doc.select(".wp-manga-chapter-img img").map { it.attr("src") }
     }
 }
 
-// --- CLASS PENDUKUNG (Agar tidak error Unresolved Reference) ---
-// Karena kita standalone, kita harus mendefinisikan struktur data dasar di sini
-
+// --- PERBAIKAN UTAMA: Class Source sekarang memiliki definisi fungsi ---
 abstract class Source {
     abstract val name: String
     abstract val baseUrl: String
     abstract val language: String
+    
+    // Definisi fungsi abstract agar bisa di-override oleh KomikIndo
+    abstract fun popularManga(page: Int): List<Manga>
+    abstract fun mangaDetails(url: String): Manga
+    abstract fun chapterList(manga: Manga): List<Chapter>
+    abstract fun pageList(chapter: Chapter): List<String>
+    
     val http = HttpClient()
 }
 
+// --- DATA CLASSES ---
 data class Manga(val name: String, val url: String, val thumbnail: String, val description: String?, val artist: String?)
 data class Chapter(val name: String, val url: String, val index: Int)
 
