@@ -1,15 +1,13 @@
-name: Build and Release Extension
+name: Build Extension APK
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [ "main", "master" ] # Sekarang jalan setiap kali kamu push, tidak perlu tag v1.0 dll
+  workflow_dispatch: # Kamu bisa menjalankan ini secara manual dari tab Actions
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout code
@@ -25,7 +23,6 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # PERBAIKAN UTAMA: Mengunci versi Gradle ke 7.5.1 agar cocok dengan Plugin 7.4.2
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
@@ -34,17 +31,10 @@ jobs:
       - name: Build with Gradle
         run: gradle assembleRelease
 
-      - name: Prepare APK for Release
-        run: |
-          mkdir -p release-artifacts
-          find . -name "*.apk" -exec cp {} release-artifacts/extension-release.apk \;
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+      # LANGKAH PALING PENTING: Simpan APK sebagai Artifact agar bisa didownload langsung
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
         with:
-          files: release-artifacts/extension-release.apk
-          name: "Release ${{ github.ref_name }}"
-          tag_name: ${{ github.ref }}
-          body: "Version fix: Locked Gradle to 7.5.1 for stability. Versi: ${{ github.ref_name }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: My-Extension-APK # Nama file zip yang akan muncul nanti
+          path: |
+            **/*.apk
