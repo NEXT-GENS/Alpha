@@ -3,13 +3,13 @@ name: Build and Release Extension
 on:
   push:
     tags:
-      - 'v*' # Workflow ini HANYA berjalan jika kamu membuat Tag yang diawali huruf 'v' (contoh: v1.0, v1.1)
+      - 'v*' # Jalan saat kamu buat tag v1.0, v1.1, dll
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # WAJIB: Memberikan izin kepada GitHub Action untuk membuat Release & upload file
+      contents: write
 
     steps:
       - name: Checkout code
@@ -22,25 +22,22 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
+      # CARA A: Langsung panggil 'gradle' sistem, bukan './gradlew'
       - name: Build with Gradle
-        run: ./gradlew assembleRelease
+        run: gradle assembleRelease
 
-      # Langkah ini mencari file APK di folder build dan mengubah namanya menjadi simpel
       - name: Prepare APK for Release
         run: |
           mkdir -p release-artifacts
-          cp app/build/outputs/apk/release/*.apk release-artifacts/extension-release.apk
+          # Mencari APK di folder build (path standar Android Gradle Plugin)
+          find . -name "*.apk" -exec cp {} release-artifacts/extension-release.apk \;
 
-      # Menggunakan Action dari softprops untuk membuat GitHub Release secara otomatis
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: release-artifacts/extension-release.apk
           name: "Release ${{ github.ref_name }}"
           tag_name: ${{ github.ref }}
-          body: "Otomatis di-build oleh GitHub Actions. Versi: ${{ github.ref_name }}"
+          body: "Otomatis di-build menggunakan Cara A. Versi: ${{ github.ref_name }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
