@@ -22,13 +22,14 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
-      # STEP BARU: Menginstal Android SDK agar Gradle tidak error "SDK not found"
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # Kita gunakan gradle-build-action untuk memastikan versi gradle kompatibel
+      # PERBAIKAN UTAMA: Mengunci versi Gradle ke 7.5.1 agar cocok dengan Plugin 7.4.2
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 7.5.1
 
       - name: Build with Gradle
         run: gradle assembleRelease
@@ -44,6 +45,6 @@ jobs:
           files: release-artifacts/extension-release.apk
           name: "Release ${{ github.ref_name }}"
           tag_name: ${{ github.ref }}
-          body: "Build fixed with Android SDK setup. Versi: ${{ github.ref_name }}"
+          body: "Version fix: Locked Gradle to 7.5.1 for stability. Versi: ${{ github.ref_name }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
